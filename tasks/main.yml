@@ -1,0 +1,16 @@
+---
+- name: "Get the current system image"
+  ios_command:
+    provider: "{{ netops_provider | default (omit) }}"
+    commands:
+      - show version | inc System image
+  register: ios_command_out
+
+- set_fact:
+    current_ios_filename: "{{ ios_command_out.stdout_lines | regex_replace('^.+:[/](.+bin).+$', '\\1') }}"
+
+- debug: msg="Device is running system file {{ current_ios_filename }}"
+
+- block:
+  - debug: msg="Device needs to be upgraded to {{ ios_filename }}"
+  when: current_ios_filename != ios_filename
